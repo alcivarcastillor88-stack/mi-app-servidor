@@ -21,10 +21,16 @@ if (!$serial || !$dispositivo_id) {
 }
 
 // 🔌 Conexión BD
-$conn = new mysqli("localhost", "usuario", "password", "basedatos");
+$conn = new mysqli(
+    getenv("MYSQLHOST"),
+    getenv("MYSQLUSER"),
+    getenv("MYSQLPASSWORD"),
+    getenv("MYSQLDATABASE"),
+    getenv("MYSQLPORT")
+);
 
 if ($conn->connect_error) {
-    echo json_encode(["error" => "Error de conexión"]);
+    echo json_encode(["error" => "Error de conexión a la base de datos"]);
     exit;
 }
 
