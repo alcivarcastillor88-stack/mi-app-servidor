@@ -1,4 +1,13 @@
 <?php
+$headers = getallheaders();
+$apiKey = getenv("API_KEY");
+
+if (!isset($headers["X-API-KEY"]) || $headers["X-API-KEY"] !== $apiKey) {
+    http_response_code(403);
+    echo json_encode(["error" => "Acceso no autorizado"]);
+    exit;
+}
+
 header("Content-Type: application/json");
 
 $databaseUrl = getenv("DATABASE_URL");
