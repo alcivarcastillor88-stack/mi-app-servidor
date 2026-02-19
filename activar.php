@@ -1,6 +1,12 @@
 <?php
 header("Content-Type: application/json");
-
+echo json_encode([
+    "host" => getenv("MYSQLHOST"),
+    "port" => getenv("MYSQLPORT"),
+    "user" => getenv("MYSQLUSER"),
+    "database" => getenv("MYSQLDATABASE")
+]);
+exit;
 // 🔐 Validar API KEY
 $apiKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
 
