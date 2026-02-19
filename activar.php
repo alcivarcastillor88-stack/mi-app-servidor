@@ -1,13 +1,7 @@
 <?php
 header("Content-Type: application/json");
-echo json_encode([
-    "host" => getenv("MYSQLHOST"),
-    "port" => getenv("MYSQLPORT"),
-    "user" => getenv("MYSQLUSER"),
-    "database" => getenv("MYSQLDATABASE")
-]);
-exit;
-// 🔐 Validar API KEY
+
+// 🔐 1️⃣ Validar API KEY
 $apiKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
 
 if ($apiKey !== '9F7X-SECURE-2026-ALCIVAR') {
@@ -15,7 +9,7 @@ if ($apiKey !== '9F7X-SECURE-2026-ALCIVAR') {
     exit;
 }
 
-// 📥 Recibir datos
+// 📥 2️⃣ Recibir datos JSON
 $data = json_decode(file_get_contents("php://input"), true);
 
 $serial = $data['serial'] ?? '';
@@ -26,21 +20,33 @@ if (!$serial || !$dispositivo_id) {
     exit;
 }
 
-// 🔌 Conexión BD
-$conn = new mysqli(
-    getenv("MYSQLHOST"),
-    getenv("MYSQLUSER"),
-    getenv("MYSQLPASSWORD"),
-    getenv("MYSQLDATABASE"),
-    getenv("MYSQLPORT")
-);
+// 🔌 3️⃣ Conexión profesional usando DATABASE_URL (Railway)
+$databaseUrl = getenv("DATABASE_URL");
 
-if ($conn->connect_error) {
-    echo json_encode(["error" => "Error de conexión a la base de datos"]);
+if (!$databaseUrl) {
+    echo json_encode(["error" => "DATABASE_URL no configurada"]);
     exit;
 }
 
-// 🔍 Buscar licencia
+$url = parse_url($databaseUrl);
+
+$conn = new mysqli(
+    $url["host"],
+    $url["user"],
+    $url["pass"],
+    ltrim($url["path"], "/"),
+    $url["port"]
+);
+
+if ($conn->connect_error) {
+    echo json_encode([
+        "error" => "Error de conexión a la base de datos",
+        "detalle" => $conn->connect_error
+    ]);
+    exit;
+}
+
+// 🔍 4️⃣ Buscar licencia
 $stmt = $conn->prepare("SELECT estado, dispositivo_id FROM licencias WHERE serial = ?");
 $stmt->bind_param("s", $serial);
 $stmt->execute();
@@ -53,7 +59,7 @@ if ($result->num_rows === 0) {
 
 $row = $result->fetch_assoc();
 
-// 🟢 Si está disponible → activar
+// 🟢 5️⃣ Si está disponible → activar
 if ($row['estado'] === "disponible") {
 
     $update = $conn->prepare("UPDATE licencias 
@@ -64,23 +70,4 @@ if ($row['estado'] === "disponible") {
     $update->bind_param("ss", $dispositivo_id, $serial);
     $update->execute();
 
-    echo json_encode(["success" => true]);
-    exit;
-}
-
-// 🟡 Si ya está activada
-if ($row['estado'] === "activado") {
-
-    // ✅ Mismo dispositivo → permitir
-    if ($row['dispositivo_id'] === $dispositivo_id) {
-        echo json_encode(["success" => true]);
-        exit;
-    }
-
-    // ❌ Otro dispositivo → bloquear
-    echo json_encode([
-        "error" => "Licencia ya vinculada a otro dispositivo"
-    ]);
-    exit;
-}
-?>
+    echo json_encode(["success" => t]()_
