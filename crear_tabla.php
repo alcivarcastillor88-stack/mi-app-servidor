@@ -1,12 +1,20 @@
 <?php
 
-$host = getenv("MYSQLHOST");
-$user = getenv("MYSQLUSER");
-$password = getenv("MYSQLPASSWORD");
-$database = getenv("MYSQLDATABASE");
-$port = getenv("MYSQLPORT");
+$url = getenv("DATABASE_URL");
 
-$conexion = new mysqli($host, $user, $password, $database, $port);
+$db = parse_url($url);
+
+$host = $db["host"];
+$user = $db["user"];
+$pass = $db["pass"];
+$dbname = ltrim($db["path"], '/');
+$port = $db["port"];
+
+$conexion = new mysqli($host, $user, $pass, $dbname, $port);
+
+if ($conexion->connect_error) {
+    die("Error de conexión: " . $conexion->connect_error);
+}
 
 $sql = "CREATE TABLE IF NOT EXISTS licencias (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -17,11 +25,12 @@ $sql = "CREATE TABLE IF NOT EXISTS licencias (
 )";
 
 if ($conexion->query($sql) === TRUE) {
-    echo "Tabla creada correctamente";
+    echo "Tabla creada correctamente 🚀";
 } else {
-    echo "Error creando tabla";
+    echo "Error creando tabla: " . $conexion->error;
 }
 
 $conexion->close();
 
 ?>
+
