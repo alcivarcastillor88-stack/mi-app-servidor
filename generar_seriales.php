@@ -1,15 +1,19 @@
 <?php
 
-$conn = new mysqli(
-    getenv("MYSQLHOST"),
-    getenv("MYSQLUSER"),
-    getenv("MYSQLPASSWORD"),
-    getenv("MYSQLDATABASE"),
-    getenv("MYSQLPORT")
-);
+$databaseUrl = getenv('DATABASE_URL');
+
+$url = parse_url($databaseUrl);
+
+$host = $url['host'];
+$user = $url['user'];
+$pass = $url['pass'];
+$db   = ltrim($url['path'], '/');
+$port = $url['port'];
+
+$conn = new mysqli($host, $user, $pass, $db, $port);
 
 if ($conn->connect_error) {
-    die("Error conexión");
+    die("Error conexión: " . $conn->connect_error);
 }
 
 function generarSerial() {
