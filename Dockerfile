@@ -1,12 +1,10 @@
 FROM php:8.2-cli
 
-# Instalar extensión mysqli
 RUN docker-php-ext-install mysqli
 
 WORKDIR /app
-
 COPY . .
 
-EXPOSE 9000
+EXPOSE 8080
 
-CMD php -S 0.0.0.0:$PORT
+CMD ["sh", "-c", "php -S 0.0.0.0:${PORT:-8080}"]
