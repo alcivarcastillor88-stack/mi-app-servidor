@@ -1,12 +1,11 @@
 <?php
-$headers = getallheaders();
-$apiKey = getenv("API_KEY");
+$apiKey = $_SERVER['HTTP_X_API_KEY'] ?? '';
 
-if (!isset($headers["X-API-KEY"]) || $headers["X-API-KEY"] !== $apiKey) {
-    http_response_code(403);
+if ($apiKey !== '9F7X-SECURE-2026-ALCIVAR') {
     echo json_encode(["error" => "Acceso no autorizado"]);
     exit;
 }
+
 
 header("Content-Type: application/json");
 
